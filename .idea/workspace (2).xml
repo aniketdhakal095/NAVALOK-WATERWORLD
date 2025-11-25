@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="861266e3-99b4-4d20-9b38-15446d0d53ec" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/home.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/inbox.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/inbox.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(public)/login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(public)/login.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Checkout/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/Checkout/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/PaymentPage/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/PaymentPage/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/WatingPage/index.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/cart/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/cart/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/chat-screen/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/chat-screen/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/farm-sell-product/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/farm-sell-product/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/farmer/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/farmer/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/inventory-sell-product/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/inventory-sell-product/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/inventoryexplore/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/inventoryexplore/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/product-details/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/product-details/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Farmer/InventoryProductListbyCategory.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Farmer/InventoryProductListbyCategory.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Home/Category.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Home/Category.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Home/ProductListByCategory.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Home/ProductListByCategory.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Home/ProductListItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Home/ProductListItem.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ProductDetails/AddToCart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ProductDetails/AddToCart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ProductDetails/SelectQuantity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ProductDetails/SelectQuantity.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8
+}]]></component>
+  <component name="ProjectId" id="326ZdkKozFlrtZ7k8Jue81H9kxP" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Users/anike/OneDrive/Desktop/freshfarm/freshfarm"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="861266e3-99b4-4d20-9b38-15446d0d53ec" name="Changes" comment="" />
+      <created>1756743072734</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1756743072734</updated>
+    </task>
+    <servers />
+  </component>
+</project>
