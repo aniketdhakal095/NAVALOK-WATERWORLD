@@ -33,11 +33,22 @@ const UpdateFav = async (favorites, user) => {
         }
 
         const docRef = doc(db, 'userFavProduct', user.primaryEmailAddress.emailAddress);
-        await updateDoc(docRef, {
-            favorites: favorites
-        });
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            await updateDoc(docRef, {
+                favorites: favorites
+            });
+        } else {
+            // Create document if it doesn't exist
+            await setDoc(docRef, {
+                email: user.primaryEmailAddress.emailAddress,
+                favorites: favorites
+            });
+        }
     } catch (e) {
         console.error("Error updating favorites: ", e);
+        throw e; // Re-throw to allow error handling in calling code
     }
 };
 

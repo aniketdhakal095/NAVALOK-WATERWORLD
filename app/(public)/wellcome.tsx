@@ -31,7 +31,18 @@ const Welcome = () => {
             textAlign: 'center',
           }}
         >
-          Welcome To, FRESH FARM
+          Welcome To, 
+         
+        </Text>
+         <Text
+          style={{
+            fontFamily: 'outfits-extrabold',
+            fontSize: 25,
+            textAlign: 'center',
+          }}
+        >
+         
+          Navalok-WaterWorld
         </Text>
         <Text
           style={{
@@ -42,7 +53,7 @@ const Welcome = () => {
             marginTop: 10,
           }}
         >
-          Eat fresh food, get a healthy life
+          Begining of a new waterlife journey..
         </Text>
 
         {/* Get Started Button */}

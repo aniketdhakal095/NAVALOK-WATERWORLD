@@ -15,13 +15,13 @@ const PublicLayout = () => {
       <Stack.Screen
         name="wellcome"
         options={{
-          headerTitle: 'Fresh Farm',
+          headerTitle: 'Navalok',
           headerShown:false,
         }}></Stack.Screen>
       <Stack.Screen
         name="login"
         options={{
-          headerTitle: 'Fresh Farm',
+          headerTitle: 'Navalok',
         }}></Stack.Screen>
       <Stack.Screen
         name="register"

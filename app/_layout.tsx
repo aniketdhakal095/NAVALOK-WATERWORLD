@@ -9,7 +9,7 @@ import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from './../config/FirebaseConfig'; 
 import { useUser } from '@clerk/clerk-expo';
 
-const CLERK_PUBLISHABLE_KEY = 'pk_test_cmVhbC1zcXVpcnJlbC00OC5jbGVyay5hY2NvdW50cy5kZXYk';
+const CLERK_PUBLISHABLE_KEY = 'pk_test_c2VsZWN0LWtpdHRlbi0xMS5jbGVyay5hY2NvdW50cy5kZXYk';
 
 // 📌 Function to get push notification permission & token
 const registerForPushNotifications = async () => {
@@ -30,24 +30,8 @@ const registerForPushNotifications = async () => {
   return token;
 };
 
-// Send push notifications to Expo push token
-const sendPushNotification = async (expoPushToken, message) => {
-  const body = JSON.stringify({
-    to: expoPushToken,
-    sound: 'default',
-    title: 'Notification Title',
-    body: message,
-    data: { extraData: 'Some extra data' }, // Optional data
-  });
 
-  await fetch('https://exp.host/--/api/v2/push/send', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: body,
-  });
-};
+
 
 const InitialLayout = () => {
   const { isLoaded, isSignedIn } = useAuth();

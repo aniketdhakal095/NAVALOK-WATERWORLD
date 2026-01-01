@@ -6,8 +6,13 @@ import { db } from '../../config/FirebaseConfig';
 
 import { StyleSheet } from 'react-native';
 
+interface SliderItem {
+    imageUrl: string;
+    [key: string]: any;
+}
+
 const Slider = () => {
-    const [sliderList,setsliderList]=useState([]);
+    const [sliderList,setsliderList]=useState<SliderItem[]>([]);
     useEffect(()=>{
         GetSliders();
 
@@ -17,7 +22,7 @@ const Slider = () => {
         const snapshot=await getDocs(collection(db, "Sliders"));
         snapshot.forEach((doc)=>{
             console.log(doc.data());
-            setsliderList(sliderList=>[...sliderList,doc.data()])
+            setsliderList(sliderList=>[...sliderList,doc.data() as SliderItem])
         });
 
     };

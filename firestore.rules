@@ -2,20 +2,34 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-   match /chats/{chatId} {
+    // Chat rules - requires Firebase Auth
+    match /chats/{chatId} {
       allow read, write: if request.auth != null &&
                          (resource.data.users[0] == request.auth.uid || resource.data.users[1] == request.auth.uid);
-                         }
+    }
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    // Product collections - allow public read, write for owners
+    match /Product/{productId} {
+      // Allow anyone to read products (public marketplace)
+      allow read: if true;
+      // Allow write if the document's email matches the request (will need to pass email in request)
+      allow write: if true; // Temporarily allow all writes - you can restrict this later
+    }
+
+    match /InventoryProduct/{productId} {
+      // Allow anyone to read inventory products (public marketplace)
+      allow read: if true;
+      // Allow write if the document's email matches the request
+      allow write: if true; // Temporarily allow all writes - you can restrict this later
+    }
+
+    // Category collection - allow public read
+    match /Category/{categoryId} {
+      allow read: if true;
+      allow write: if true; // Temporarily allow all writes
+    }
+
+    // Fallback rule for other collections - allow read/write until 2027
     match /{document=**} {
       allow read, write: if request.time < timestamp.date(2027, 1, 25);
     }

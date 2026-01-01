@@ -18,11 +18,8 @@
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "NOTIFICATIONS"
+        "android.permission.NOTIFICATIONS"
       ],
-      
-      
-      
       "package": "com.company.navalok"
     },
     "web": {
@@ -55,8 +52,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "e2ab979d-b0ae-4fba-b0f2-ec0b7a45dc32"
+        "projectId": "0bbd33ee-d187-48e4-8e6c-cb1320843502"
       }
-    }
+    },
+    "owner": "aniketdhakal"
   }
 }
