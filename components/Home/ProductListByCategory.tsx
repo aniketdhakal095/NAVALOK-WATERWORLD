@@ -67,6 +67,9 @@ const styles = StyleSheet.create({
   },
   row: {
     justifyContent: 'space-between',
+    marginBottom: 10, 
+    width: '40%',
+     
   },
   productItem: {
     width: ITEM_WIDTH,

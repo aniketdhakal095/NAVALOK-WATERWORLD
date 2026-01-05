@@ -16,9 +16,9 @@ export default function Aboutproduct({product}) {
       numberOfLines={readMore?3:30}
       style={{
         fontFamily:'outfits',
-        fontSize:16
+        fontSize:16,
       }}
-      >This product is {product?.category} {product?.description} </Text>
+      > Product Category {product?.category} {product?.description} </Text>
       {readMore&&
       <Pressable onPress={()=>setReadMore(false)}>
       <Text style={{

@@ -233,7 +233,7 @@ export default function FarmSellProduct() {
       }
 
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
@@ -254,7 +254,7 @@ export default function FarmSellProduct() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={20} color="black" />
         </Pressable>
-        <Text style={styles.title}>Sell Farm Product</Text>
+        <Text style={styles.title}>Sell Aquarium Product</Text>
       </View>
 
       {/* Image Picker */}
@@ -330,10 +330,10 @@ export default function FarmSellProduct() {
             handleInputChange('measureUnit', itemValue);
           }}
         >
-          <Picker.Item label="Kg" value="Kg" />
-          <Picker.Item label="Ltr" value="Ltr" />
-          <Picker.Item label="gm" value="gm" />
-          <Picker.Item label="Ml" value="Ml" />
+          <Picker.Item label="sq/ft" value="sq/ft" />
+          <Picker.Item label="Unit" value="Unit" />
+          <Picker.Item label="kg" value="kg" />
+          <Picker.Item label="Pair" value="Pair" />
           <Picker.Item label="Dozen" value="dozen" />
         </Picker>
       </View>

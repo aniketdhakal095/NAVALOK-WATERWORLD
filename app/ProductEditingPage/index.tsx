@@ -1,53 +1,80 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  Image,
+} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
-import { collection, doc, getDoc, updateDoc, getDocs } from 'firebase/firestore';
-import { db } from '../../config/FirebaseConfig'; // Import Firestore from Firebase config
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { collection, doc, getDoc, updateDoc, getDocs, DocumentData } from 'firebase/firestore';
+import { db } from '../../config/FirebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
-import { useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { useUser } from '@clerk/clerk-expo';
 
+// ------------------- Types -------------------
+type ProductParams = {
+  id: string;
+};
+
+type FormData = {
+  name: string;
+  category: string;
+  price: string;
+  description: string;
+  imageUrl: string;
+  measureUnit: string;
+  quantity: string;
+};
+
+type Category = {
+  name: string;
+};
+
 export default function ProductEditPage() {
   const router = useRouter();
-  const product = useLocalSearchParams();
+  const params = useLocalSearchParams<ProductParams>();
   const { user } = useUser();
 
-  // State for categories, formData, and loading
-  const [categoryList, setCategoryList] = useState([]);
-  const [formData, setFormData] = useState({
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     category: '',
     price: '',
     description: '',
     imageUrl: '',
     measureUnit: '',
-    quantity: '', // Initialize quantity field
+    quantity: '',
   });
   const [loading, setLoading] = useState(false);
 
-  // Fetch product details from Firestore on component mount
+  // ------------------- Fetch product and categories -------------------
   useEffect(() => {
     fetchProductDetails();
-    GetCategories();  // Fetch categories on mount
+    fetchCategories();
   }, []);
 
-  // Fetch product details from Firestore
   const fetchProductDetails = async () => {
+    if (!params.id) return;
     try {
-      const productRef = doc(db, 'Product', product.id as string); // Fix: ensure product.id is a string
+      const productRef = doc(db, 'Product', params.id);
       const productSnap = await getDoc(productRef);
       if (productSnap.exists()) {
-        const data = productSnap.data();
+        const data = productSnap.data() as DocumentData;
         setFormData({
           name: data.name || '',
           category: data.category || '',
-          price: data.price || '',
+          price: data.price?.toString() || '',
           description: data.description || '',
           imageUrl: data.imageUrl || '',
           measureUnit: data.measureUnit || '',
-          quantity: data.quantity || '', 
+          quantity: data.quantity?.toString() || '',
         });
       } else {
         Alert.alert('Error', 'Product not found!');
@@ -58,11 +85,10 @@ export default function ProductEditPage() {
     }
   };
 
-  // Fetch categories from Firestore and set them in categoryList
-  const GetCategories = async () => {
+  const fetchCategories = async () => {
     try {
       const snapshot = await getDocs(collection(db, 'Category'));
-      const categories = snapshot.docs.map(doc => doc.data());
+      const categories: Category[] = snapshot.docs.map((doc) => doc.data() as Category);
       setCategoryList(categories);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -70,18 +96,14 @@ export default function ProductEditPage() {
     }
   };
 
-  // Handle changes in form fields
-  const handleInputChange = (fieldName, fieldValue) => {
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: fieldValue,
-    }));
+  // ------------------- Handlers -------------------
+  const handleInputChange = (fieldName: keyof FormData, fieldValue: string) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: fieldValue }));
   };
 
-  // Handle image picker for product image
   const imagePicker = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -89,12 +111,11 @@ export default function ProductEditPage() {
 
     if (!result.canceled) {
       const imageUrl = await uploadImageToCloudinary(result.assets[0].uri);
-      setFormData((prev) => ({ ...prev, imageUrl })); // Update formData with new imageUrl
+      setFormData((prev) => ({ ...prev, imageUrl }));
     }
   };
 
-  // Upload image to Cloudinary
-  const uploadImageToCloudinary = async (imageUri) => {
+  const uploadImageToCloudinary = async (imageUri: string) => {
     try {
       const response = await fetch(imageUri);
       const blob = await response.blob();
@@ -107,7 +128,7 @@ export default function ProductEditPage() {
       const uploadResponse = await fetch('https://api.cloudinary.com/v1_1/dgydap1ot/image/upload', {
         method: 'POST',
         body: data,
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
       });
 
       const result = await uploadResponse.json();
@@ -115,42 +136,53 @@ export default function ProductEditPage() {
     } catch (error) {
       console.error('Upload error:', error);
       Alert.alert('Error', 'Failed to upload image.');
+      return '';
     }
   };
 
-  // Update product in Firestore
   const updateProduct = async () => {
-      try {
-        setLoading(true);
-        // Use product.id instead of productId
-        await updateDoc(doc(db, 'Product', product.id as string), formData); // Fix: use product.id here
-        Alert.alert('Success', 'Product updated successfully!');
-        router.back();
-      } catch (error) {
-        console.error('Update error:', error);
-        Alert.alert('Error', 'Failed to update product.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!params.id) return;
+
+    try {
+      setLoading(true);
+      await updateDoc(doc(db, 'Product', params.id), {
+        ...formData,
+        price: Number(formData.price),
+        quantity: Number(formData.quantity),
+      });
+      Alert.alert('Success', 'Product updated successfully!');
+      router.back();
+    } catch (error) {
+      console.error('Update error:', error);
+      Alert.alert('Error', 'Failed to update product.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ------------------- Render -------------------
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={20} color="black" />
         </Pressable>
-        <Text style={styles.title}>Edit Farm Product</Text>
+        <Text style={styles.title}>Edit Product</Text>
       </View>
 
       {/* Image Picker */}
       <Pressable onPress={imagePicker}>
         <Image
-          source={formData.imageUrl ? { uri: formData.imageUrl } : require('../../assets/images/imageplaceholder.jpg')}
+          source={
+            formData.imageUrl
+              ? { uri: formData.imageUrl }
+              : require('../../assets/images/imageplaceholder.jpg')
+          }
           style={styles.imagePreview}
         />
       </Pressable>
 
-      {/* Product Name */}
+      {/* Name */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Product Name</Text>
         <TextInput
@@ -160,13 +192,13 @@ export default function ProductEditPage() {
         />
       </View>
 
-      {/* Product Category */}
+      {/* Category */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Product Category</Text>
         <Picker
           selectedValue={formData.category}
           style={styles.picker}
-          onValueChange={(itemValue) => handleInputChange('category', itemValue)}
+          onValueChange={(value) => handleInputChange('category', value)}
         >
           {categoryList.map((category) => (
             <Picker.Item key={category.name} label={category.name} value={category.name} />
@@ -174,7 +206,7 @@ export default function ProductEditPage() {
         </Picker>
       </View>
 
-      {/* Product Price */}
+      {/* Price */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Product Price (Rs.)</Text>
         <TextInput
@@ -185,18 +217,18 @@ export default function ProductEditPage() {
         />
       </View>
 
-      {/* Product Quantity */}
+      {/* Quantity */}
       <View style={styles.inputContainer}>
-      <Text style={styles.label}>Product Quantity</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="number-pad"
-        value={formData.quantity}
-         onChangeText={(value) => handleInputChange('quantity', value)}
+        <Text style={styles.label}>Product Quantity</Text>
+        <TextInput
+          style={styles.input}
+          keyboardType="number-pad"
+          value={formData.quantity}
+          onChangeText={(value) => handleInputChange('quantity', value)}
         />
-        </View>
+      </View>
 
-      {/* Product Measure Unit */}
+      {/* Measure Unit */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Product Measure Unit</Text>
         <Picker
@@ -208,11 +240,11 @@ export default function ProductEditPage() {
           <Picker.Item label="Ltr" value="Ltr" />
           <Picker.Item label="gm" value="gm" />
           <Picker.Item label="Ml" value="Ml" />
-          <Picker.Item label="Dozen" value="dozen" />
+          <Picker.Item label="Dozen" value="Dozen" />
         </Picker>
       </View>
 
-      {/* Product Description */}
+      {/* Description */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Product Description</Text>
         <TextInput
@@ -224,7 +256,7 @@ export default function ProductEditPage() {
         />
       </View>
 
-      {/* Save Changes Button */}
+      {/* Update Button */}
       <TouchableOpacity style={styles.button} onPress={updateProduct} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Updating...' : 'Save Changes'}</Text>
       </TouchableOpacity>
@@ -232,7 +264,7 @@ export default function ProductEditPage() {
   );
 }
 
-// Styles
+// ------------------- Styles -------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -275,7 +307,6 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     height: 70,
     marginTop: 5,
-    
   },
   label: {
     marginVertical: 5,

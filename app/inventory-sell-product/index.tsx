@@ -236,7 +236,7 @@ export default function InventorySellProduct() {
       }
 
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
+       mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
@@ -321,6 +321,27 @@ export default function InventorySellProduct() {
           onChangeText={(value) => handleInputChange('quantity', value)}
         />
       </View>
+      {/* Product Measuring Unit */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Product Measuring Unit</Text>
+              <Picker
+                selectedValue={measureUnit}
+                style={styles.input}
+                onValueChange={(itemValue) => {
+                  setMeasureUnit(itemValue);
+                  handleInputChange('measureUnit', itemValue);
+                }}
+              >
+                <Picker.Item label="ft" value="ft" />
+                <Picker.Item label="Unit" value="Unit" />
+                <Picker.Item label="kg" value="kg" />
+                <Picker.Item label="gm" value="gm" />
+
+                <Picker.Item label="Pair" value="Pair" />
+                <Picker.Item label="Dozen" value="dozen" />
+              </Picker>
+            </View>
+      
 
       {/* Product Description */}
       <View style={styles.inputContainer}>
@@ -351,6 +372,6 @@ const styles = StyleSheet.create({
   inputContainer: { marginVertical: 5 },
   input: { padding: 10, backgroundColor: '#fff', borderRadius: 7 },
   label: { marginVertical: 5, fontWeight: 'bold' },
-  button: { padding: 15, backgroundColor: 'green', borderRadius: 7, marginVertical: 10 },
+  button: { padding: 15, backgroundColor: '#356de7ff', borderRadius: 7, marginVertical: 10 },
   buttonText: { textAlign: 'center', fontWeight: 'bold', color: '#fff' },
 });

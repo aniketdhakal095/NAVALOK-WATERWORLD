@@ -40,40 +40,33 @@ export default function Profile() {
   const Menu = [
     {
       id: 1,
+      name: 'Fishs and Plants',
+      icon: 'add-circle-outline',
+      path: '/FishandPlant',
+    },
+    {
+      id: 2,
       name: 'My Orders',
       icon: 'add-circle-outline',
       path: '/see-my-order',
     },
     {
-      id: 2,
-      name: 'Sell Produce Product',
+      id: 3,
+      name: 'Sell Aquarium Product',
       icon: 'add-circle-outline',
       path: '/farm-sell-product',
     },
     {
-      id: 3,
-      name: 'Sell Asset Product',
+      id: 4,
+      name: 'Sell Inventory Product',
       icon: 'add-circle-outline',
       path: '/inventory-sell-product',
     },
-    
-    {
-      id: 4,
-      name: 'Favorites',
-      icon: 'heart-outline',
-      path: '/(auth)/favorite',
-    },
     {
       id: 5,
-      name: 'Inbox',
+      name: 'Console',
       icon: 'chatbubble-outline',
-      path: '/(auth)/inbox',
-    },
-    {
-      id: 6,
-      name: 'Farmer Console',
-      icon: 'chatbubble-outline',
-      path: '/farmer',
+      path: '/console',
     },
   ];
 

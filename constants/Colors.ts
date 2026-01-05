@@ -1,10 +1,10 @@
 export default{
-    PRIMARY:'#E8820E',
+    PRIMARY:'#356de7ff',
     GRAY:'#808080',
-    HeadCOL:'#135814',
+    HeadCOL:'#356de7ff',
     WHITE:'#fff',
-    BUTTON_COLOR:'#135814',
+    BUTTON_COLOR:'#a8bdecff',
     SECONDARY:'#DEFFFC',
-    PRIMARYB:'#FFF700',
+    PRIMARYB:'#356de7ff',
     SECONDARYB:'#003693'
 }
