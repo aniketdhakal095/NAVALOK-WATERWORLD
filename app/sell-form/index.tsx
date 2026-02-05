@@ -25,6 +25,7 @@ export default function SellForm() {
   const [name, setName] = useState('');
   const [type, setType] = useState<'fish' | 'plant'>('fish');
   const [waterCategory, setWaterCategory] = useState<'salt' | 'fresh'>('salt');
+  const [capacity, setCapacity] = useState(''); // ✅ ADDED
   const [quantity, setQuantity] = useState('');
   const [measureUnit, setMeasureUnit] = useState('pcs');
   const [price, setPrice] = useState('');
@@ -36,46 +37,59 @@ export default function SellForm() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
     });
-    if (!result.canceled) setImage(result.assets[0].uri);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
   };
 
   const uploadToCloudinary = async () => {
     if (!image) return null;
+
     const data = new FormData();
-    data.append('file', { uri: image, type: 'image/jpeg', name: 'product.jpg' } as any);
+    data.append(
+      'file',
+      { uri: image, type: 'image/jpeg', name: 'product.jpg' } as any
+    );
     data.append('upload_preset', '_ProductImage');
 
-    const res = await fetch('https://api.cloudinary.com/v1_1/dgydap1ot/image/upload', {
-      method: 'POST',
-      body: data,
-    });
+    const res = await fetch(
+      'https://api.cloudinary.com/v1_1/dgydap1ot/image/upload',
+      {
+        method: 'POST',
+        body: data,
+      }
+    );
 
     const result = await res.json();
     return result.secure_url;
   };
 
   const onSubmit = async () => {
-    if (!name || !image || !price) {
-      Alert.alert('Error', 'Please fill required fields');
+    if (!name || !image || !price || !capacity) {
+      Alert.alert('Error', 'Please fill all required fields');
       return;
     }
+
     try {
       setLoading(true);
+
       const imageUrl = await uploadToCloudinary();
 
       await addDoc(collection(db, 'Fish_Plant'), {
         name,
         type,
         waterCategory,
+        capacity: Number(capacity), // ✅ STORED CORRECTLY
         quantity,
         measureUnit,
         price: Number(price),
         about,
-        imageUrl: imageUrl,
+        imageUrl,
         username: user?.fullName,
         email: user?.primaryEmailAddress?.emailAddress,
-        createdAt: serverTimestamp(),
         userImage: user?.imageUrl || '',
+        createdAt: serverTimestamp(),
       });
 
       Alert.alert('Success', 'Product uploaded successfully');
@@ -97,8 +111,13 @@ export default function SellForm() {
 
       <Text style={styles.title}>Sell Fish / Plant</Text>
 
+      {/* IMAGE PICKER */}
       <TouchableOpacity style={styles.imageBox} onPress={pickImage}>
-        {image ? <Image source={{ uri: image }} style={styles.image} /> : <Text style={{ color: Colors.GRAY }}>Upload Image</Text>}
+        {image ? (
+          <Image source={{ uri: image }} style={styles.image} />
+        ) : (
+          <Text style={{ color: Colors.GRAY }}>Upload Image</Text>
+        )}
       </TouchableOpacity>
 
       <Input label="Name" value={name} onChangeText={setName} />
@@ -115,7 +134,20 @@ export default function SellForm() {
         <Picker.Item label="Fresh Water" value="fresh" />
       </Picker>
 
-      <Input label="Quantity" value={quantity} onChangeText={setQuantity} keyboardType="numeric" />
+      {/* ✅ CAPACITY FIELD */}
+      <Input
+        label="Capacity (Liters)"
+        value={capacity}
+        onChangeText={setCapacity}
+        keyboardType="numeric"
+      />
+
+      <Input
+        label="Quantity"
+        value={quantity}
+        onChangeText={setQuantity}
+        keyboardType="numeric"
+      />
 
       <Label title="Measure Unit" />
       <Picker selectedValue={measureUnit} onValueChange={setMeasureUnit}>
@@ -124,34 +156,105 @@ export default function SellForm() {
         <Picker.Item label="collection" value="collection" />
       </Picker>
 
-      <Input label="Price (Rs.)" value={price} onChangeText={setPrice} keyboardType="numeric" />
+      <Input
+        label="Price (Rs.)"
+        value={price}
+        onChangeText={setPrice}
+        keyboardType="numeric"
+      />
 
       <Label title="About" />
-      <TextInput style={styles.textArea} multiline value={about} onChangeText={setAbout} />
+      <TextInput
+        style={styles.textArea}
+        multiline
+        value={about}
+        onChangeText={setAbout}
+      />
 
       <TouchableOpacity style={styles.btn} onPress={onSubmit} disabled={loading}>
-        <Text style={styles.btnText}>{loading ? 'Uploading...' : 'Submit'}</Text>
+        <Text style={styles.btnText}>
+          {loading ? 'Uploading...' : 'Submit'}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
-const Label = ({ title }: any) => <Text style={styles.label}>{title}</Text>;
-const Input = ({ label, ...props }: any) => <>
-  <Label title={label} />
-  <TextInput style={styles.input} {...props} />
-</>;
+const Label = ({ title }: any) => (
+  <Text style={styles.label}>{title}</Text>
+);
+
+const Input = ({ label, ...props }: any) => (
+  <>
+    <Label title={label} />
+    <TextInput style={styles.input} {...props} />
+  </>
+);
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: Colors.WHITE },
-  backBtn: { paddingVertical: 6, paddingHorizontal: 10, marginBottom: 12, backgroundColor: Colors.PRIMARY, borderRadius: 12, width: 70 },
-  backText: { color: Colors.WHITE, fontFamily: 'outfits-medium' },
-  title: { fontSize: 22, fontFamily: 'outfits-bold', marginBottom: 12 },
-  imageBox: { height: 160, backgroundColor: '#f2f2f2', borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  image: { width: '100%', height: '100%', borderRadius: 12 },
-  label: { fontFamily: 'outfits-medium', marginTop: 10 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 10, marginTop: 4 },
-  textArea: { height: 100, borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 10, marginTop: 4 },
-  btn: { backgroundColor: Colors.PRIMARY, padding: 14, borderRadius: 12, marginVertical: 20 },
-  btnText: { color: Colors.WHITE, fontFamily: 'outfits-bold', textAlign: 'center' },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: Colors.WHITE,
+  },
+  backBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginBottom: 12,
+    backgroundColor: Colors.PRIMARY,
+    borderRadius: 12,
+    width: 70,
+  },
+  backText: {
+    color: Colors.WHITE,
+    fontFamily: 'outfits-medium',
+  },
+  title: {
+    fontSize: 22,
+    fontFamily: 'outfits-bold',
+    marginBottom: 12,
+  },
+  imageBox: {
+    height: 160,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  label: {
+    fontFamily: 'outfits-medium',
+    marginTop: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 4,
+  },
+  textArea: {
+    height: 100,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 4,
+  },
+  btn: {
+    backgroundColor: Colors.PRIMARY,
+    padding: 14,
+    borderRadius: 12,
+    marginVertical: 20,
+  },
+  btnText: {
+    color: Colors.WHITE,
+    fontFamily: 'outfits-bold',
+    textAlign: 'center',
+  },
 });

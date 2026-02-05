@@ -21,24 +21,23 @@ export default function ProductInfo({product}) {
         justifyContent:'space-between',
         alignItems:'center'
       }}>
-        <View style={{ flex: 1, marginRight: 10 }}>
+        <View>
             <Text style={{
                 fontFamily:'outfits-bold',
                 fontSize:27
-            }}>{product?.name || 'Product Name'}</Text>
-            {product?.category && (
-                <Text style={{
-                    fontFamily:'outfits',
-                    color:Colors.GRAY,
-                    fontSize:16,
-                    marginTop: 4,
-                }}>{product.category}</Text>
-            )}
+            }}>{product?.name}</Text>
+            <Text style={{
+                fontFamily:'outfits',
+                color:Colors.GRAY,
+                fontSize:16,
+            }}>{product?.category}</Text>
+            
         </View>
 
         <MarkFav product={product}/>
 
       </View>
+      
       
     </View>
   )

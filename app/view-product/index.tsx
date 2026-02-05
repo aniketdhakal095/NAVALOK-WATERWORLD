@@ -137,7 +137,7 @@ export default function ViewProducts() {
   },});
   };
 
-  if (loading) return <ActivityIndicator size="large" color="green" style={styles.loader} />;
+  if (loading) return <ActivityIndicator size="large" color="#356de7ff" style={styles.loader} />;
 
   return (
     <View style={styles.container}>
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
 
   filterContainer: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 10 },
   filterButton: { padding: 10, backgroundColor: '#ddd', margin: 5, borderRadius: 5 },
-  activeFilter: { backgroundColor: 'green' },
+  activeFilter: { backgroundColor: '#356de7ff' },
   filterText: { color: '#fff', fontWeight: 'bold' },
 
   noProducts: { textAlign: 'center', fontSize: 16, color: 'gray', marginTop: 20 },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   productNameGrid: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
   productCategoryGrid: { fontSize: 12, color: 'gray', textAlign: 'center' },
-  productPriceGrid: { fontSize: 14, color: 'green', fontWeight: 'bold', textAlign: 'center' },
+  productPriceGrid: { fontSize: 14, color: '#356de7ff', fontWeight: 'bold', textAlign: 'center' },
   productQuantityGrid: { fontSize: 12, color: '#555', textAlign: 'center' },
 
   gridActions: { flexDirection: 'row', marginTop: 6 },

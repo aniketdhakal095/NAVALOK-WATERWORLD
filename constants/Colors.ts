@@ -6,5 +6,6 @@ export default{
     BUTTON_COLOR:'#a8bdecff',
     SECONDARY:'#DEFFFC',
     PRIMARYB:'#356de7ff',
-    SECONDARYB:'#003693'
+    SECONDARYB:'#003693',
+    BLACK:'#000000'
 }

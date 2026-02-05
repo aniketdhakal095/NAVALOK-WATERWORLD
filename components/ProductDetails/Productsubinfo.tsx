@@ -4,13 +4,16 @@ import Colors from '../../constants/Colors'
 
 export default function Productsubinfo({product}) {
   return (
+    
     <View style={{
         padding:20
     }}>
+        
       <View style={{
         display:'flex',
         flexDirection:'row'
       }}>
+        
         <View style={{
             display:'flex',
             flexDirection:'row',

@@ -5,36 +5,24 @@ import Shared from './../Shared/Shared';
 import { useUser } from '@clerk/clerk-expo';
 
 type Product = {
-  id?: string;
-  [key: string]: any;
+  id: string;
 };
 
 type Props = {
-  product: Product | any;
+  product: Product;
 };
 
 export default function MarkFav({ product }: Props) {
   const { user } = useUser();
   const [favList, setFavList] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Get product ID - handle route params which are strings
-  const productId = React.useMemo(() => {
-    if (!product) return '';
-    // Handle direct id property - convert to string for route params
-    const id = product.id;
-    if (id) return String(id);
-    return '';
-  }, [product]);
 
   useEffect(() => {
-    if (user && productId) {
+    if (user) {
       getFav();
     }
-  }, [user, productId]);
+  }, [user, product?.id]);
 
   const getFav = async () => {
-    if (!user) return;
     try {
       const result = await Shared.GetFavList(user);
       setFavList(result?.favorites || []);
@@ -44,73 +32,42 @@ export default function MarkFav({ product }: Props) {
   };
 
   const addToFav = async () => {
-    if (!productId || !user) {
-      console.log('Cannot add to fav - missing productId or user', { productId, hasUser: !!user });
-      return;
-    }
-    
-    // Prevent duplicate adds
-    if (favList.includes(productId)) {
-      console.log('Product already in favorites');
-      return;
-    }
+    if (!product?.id) return;
 
-    setLoading(true);
-    const updatedList = [...favList, productId];
+    const updatedList = [...favList, product.id];
 
     // ✅ instant UI update
     setFavList(updatedList);
 
     try {
       await Shared.UpdateFav(updatedList, user);
-      console.log('Successfully added to favorites:', productId);
     } catch (error) {
       console.error('Add to fav failed:', error);
-      // Rollback using functional update
-      setFavList(prev => prev.filter(id => id !== productId));
-    } finally {
-      setLoading(false);
+      setFavList(favList); // rollback if failed
     }
   };
 
   const removeFromFav = async () => {
-    if (!productId || !user) {
-      console.log('Cannot remove from fav - missing productId or user', { productId, hasUser: !!user });
-      return;
-    }
+    if (!product?.id) return;
 
-    setLoading(true);
-    const updatedList = favList.filter(id => id !== productId);
+    const updatedList = favList.filter(id => id !== product.id);
 
     // ✅ instant UI update
     setFavList(updatedList);
 
     try {
       await Shared.UpdateFav(updatedList, user);
-      console.log('Successfully removed from favorites:', productId);
     } catch (error) {
       console.error('Remove fav failed:', error);
-      // Rollback using functional update
-      setFavList(prev => [...prev, productId]);
-    } finally {
-      setLoading(false);
+      setFavList(favList); // rollback if failed
     }
   };
 
-  const isFav = productId ? favList.includes(productId) : false;
-
-  // Don't show if user is not logged in
-  if (!user) {
-    return null;
-  }
+  const isFav = favList.includes(product.id);
 
   return (
     <View>
-      <Pressable 
-        onPress={isFav ? removeFromFav : addToFav}
-        disabled={loading}
-        style={{ opacity: loading ? 0.6 : 1 }}
-      >
+      <Pressable onPress={isFav ? removeFromFav : addToFav}>
         <Ionicons
           name={isFav ? 'heart' : 'heart-outline'}
           size={30}

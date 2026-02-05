@@ -31,6 +31,7 @@ type FormData = {
   imageUrl: string;
   measureUnit: string;
   quantity: string;
+  capacity: string;
 };
 
 type Category = {
@@ -51,6 +52,7 @@ export default function ProductEditPage() {
     imageUrl: '',
     measureUnit: '',
     quantity: '',
+    capacity:''
   });
   const [loading, setLoading] = useState(false);
 
@@ -75,6 +77,7 @@ export default function ProductEditPage() {
           imageUrl: data.imageUrl || '',
           measureUnit: data.measureUnit || '',
           quantity: data.quantity?.toString() || '',
+          capacity: data.capacity || '',
         });
       } else {
         Alert.alert('Error', 'Product not found!');
@@ -225,6 +228,16 @@ export default function ProductEditPage() {
           keyboardType="number-pad"
           value={formData.quantity}
           onChangeText={(value) => handleInputChange('quantity', value)}
+        />
+      </View>
+      {/* capacity */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Product capacity (Ltr)</Text>
+        <TextInput
+          style={styles.input}
+          
+          value={formData.quantity}
+          onChangeText={(value) => handleInputChange('capacity', value)}
         />
       </View>
 

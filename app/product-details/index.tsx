@@ -7,6 +7,7 @@ import Aboutproduct from '../../components/ProductDetails/Aboutproduct';
 import OwnerInfo from '../../components/ProductDetails/OwnerInfo';
 import AddToCart from '../../components/ProductDetails/AddToCart'; // Import AddToCart
 import { Ionicons } from '@expo/vector-icons';
+import Subsubinfo from '../../components/ProductDetails/subsubinfo';
 
 export default function ProductDetails() {
   const product = useLocalSearchParams();
@@ -41,6 +42,7 @@ export default function ProductDetails() {
 
         {/* Product Properties */}
         <Productsubinfo product={product} />
+        <Subsubinfo product={product}/>
 
         {/* About Product */}
         <Aboutproduct product={product} />
