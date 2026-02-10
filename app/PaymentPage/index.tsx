@@ -32,9 +32,12 @@ const KhaltiPaymentScreen = () => {
   const [orderedByName, setOrderedByName] = useState<string | null>(null);
   const [userPhone, setUserPhone] = useState<string | null>(null);
 
-  const SECRET_KEY = 'b286f943be174d158efefb7adf014e39'; // Sandbox key
-  const SUCCESS_URL = 'https://test-pay.khalti.com/?pidx=G9QT9gmheEBqE8TvFawfPj';
-  const FAILURE_URL = '';
+  // ✅ Khalti Sandbox Key
+  const SECRET_KEY = '7147956da0b749559657ceaa8832c91b';
+
+  // ✅ MUST be valid URLs (even dummy ones)
+  const SUCCESS_URL = 'https://example.com/khalti-success';
+  const FAILURE_URL = 'https://example.com/khalti-failure';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +48,7 @@ const KhaltiPaymentScreen = () => {
       }
 
       try {
+        // 🔹 Fetch Order
         const orderRef = doc(db, 'Orders', orderId);
         const orderSnap = await getDoc(orderRef);
 
@@ -57,6 +61,7 @@ const KhaltiPaymentScreen = () => {
         const order = orderSnap.data();
         setOrderData(order);
 
+        // 🔹 Fetch Product Owner
         const productOwnerEmail = order.productOwnerEmail;
         const userQuery = query(
           collection(db, 'Users'),
@@ -69,6 +74,7 @@ const KhaltiPaymentScreen = () => {
           const fullName = `${userInfo.firstName || ''} ${
             userInfo.lastName || ''
           }`.trim();
+
           setOrderedByName(fullName || productOwnerEmail);
           setUserPhone(userInfo.phone || null);
         } else {
@@ -91,6 +97,7 @@ const KhaltiPaymentScreen = () => {
       return;
     }
 
+    // ✅ Nepali phone validation
     if (!/^9[78]\d{8}$/.test(userPhone)) {
       Alert.alert(
         'Invalid Phone',
@@ -99,18 +106,16 @@ const KhaltiPaymentScreen = () => {
       return;
     }
 
-    const amount = Number(orderData?.totalPrice);
+    const amount = Number(orderData.totalPrice);
     if (isNaN(amount) || amount <= 0) {
       Alert.alert('Invalid Amount', 'Total amount must be greater than zero.');
       return;
     }
 
-    const khaltiAmount = amount * 100;
-
     const payload = {
       return_url: SUCCESS_URL,
-      website_url: FAILURE_URL,
-      amount: khaltiAmount,
+      website_url: FAILURE_URL, // 🔥 REQUIRED
+      amount: amount * 100, // paisa
       purchase_order_id: orderId,
       purchase_order_name: 'FreshFarm Order',
       customer_info: {
@@ -121,6 +126,7 @@ const KhaltiPaymentScreen = () => {
     };
 
     setLoading(true);
+
     try {
       const response = await fetch(
         'https://a.khalti.com/api/v2/epayment/initiate/',
@@ -137,24 +143,22 @@ const KhaltiPaymentScreen = () => {
       const text = await response.text();
       console.log('Khalti raw response:', text);
 
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.error('JSON Parse Error:', e);
-        Alert.alert('Khalti Error', `Unexpected response:\n\n${text.slice(0, 100)}...`);
-        return;
-      }
+      const data = JSON.parse(text);
 
       if (response.ok && data.payment_url) {
         Linking.openURL(data.payment_url);
       } else {
-        console.error('Khalti initiation failed:', data);
-        Alert.alert('Payment Error', data.detail || 'Failed to initiate payment.');
+        Alert.alert(
+          'Khalti Error',
+          data?.detail || 'Failed to initiate payment.'
+        );
       }
     } catch (error: any) {
-      console.error('Khalti fetch error:', error);
-      Alert.alert('Network Error', error?.message || 'Could not connect to Khalti.');
+      console.error('Khalti error:', error);
+      Alert.alert(
+        'Network Error',
+        error?.message || 'Could not connect to Khalti.'
+      );
     } finally {
       setLoading(false);
     }
@@ -173,17 +177,27 @@ const KhaltiPaymentScreen = () => {
           ) : orderData && userPhone ? (
             <>
               <Text style={styles.detailText}>Owner: {orderedByName}</Text>
-              <Text style={styles.detailText}>Total Amount: Rs. {orderData.totalPrice}</Text>
-              <Text style={styles.detailText}>Phone Number: {userPhone}</Text>
-              <Text style={styles.detailText}>Email: {user?.primaryEmailAddress?.emailAddress}</Text>
+              <Text style={styles.detailText}>
+                Total Amount: Rs. {orderData.totalPrice}
+              </Text>
+              <Text style={styles.detailText}>Phone: {userPhone}</Text>
+              <Text style={styles.detailText}>
+                Email: {user?.primaryEmailAddress?.emailAddress}
+              </Text>
               <Text style={styles.detailText}>Order ID: {orderId}</Text>
 
               <View style={styles.buttonContainer}>
-                <Button title="Pay with Khalti" color="#5a2d82" onPress={handlePayment} />
+                <Button
+                  title="Pay with Khalti"
+                  color="#5a2d82"
+                  onPress={handlePayment}
+                />
               </View>
             </>
           ) : (
-            <Text style={styles.errorText}>Missing order or user information.</Text>
+            <Text style={styles.errorText}>
+              Missing order or user information.
+            </Text>
           )}
         </>
       )}
