@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+</head>
+<body>
+    <h1>Payment Successful!</h1>
+    <p>Redirecting to app...</p>
+    <script>
+        // Try to open the app
+        window.location.href = 'myapp://payment-success';
+        
+        // Fallback: show a link to open the app
+        setTimeout(() => {
+            document.body.innerHTML = '<h1>Payment Successful!</h1><p><a href="myapp://payment-success">Click here to return to the app</a></p>';
+        }, 1000);
+    </script>
+</body>
+</html>

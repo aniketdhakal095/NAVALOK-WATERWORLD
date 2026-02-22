@@ -8,7 +8,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   getDoc,
   doc,
@@ -23,6 +23,7 @@ import { useUser } from '@clerk/clerk-expo';
 const KhaltiPaymentScreen = () => {
   const { orderId: rawOrderId } = useLocalSearchParams();
   const orderId = Array.isArray(rawOrderId) ? rawOrderId[0] : rawOrderId;
+  const router = useRouter();
 
   const { user } = useUser();
 
@@ -97,20 +98,45 @@ const KhaltiPaymentScreen = () => {
       return;
     }
 
-    // ✅ Nepali phone validation
-    if (!/^9[78]\d{8}$/.test(userPhone)) {
-      Alert.alert(
-        'Invalid Phone',
-        'Please enter a valid 10-digit Nepali mobile number.'
-      );
-      return;
-    }
-
     const amount = Number(orderData.totalPrice);
     if (isNaN(amount) || amount <= 0) {
       Alert.alert('Invalid Amount', 'Total amount must be greater than zero.');
       return;
     }
+
+    // Prepare invoice data and send to local invoice server (no Firebase)
+    const INVOICE_API_URL = process.env.INVOICE_API_URL || 'http://localhost:3001/api/send-invoice';
+    const sendInvoiceEmail = async () => {
+      try {
+        const invoiceData = {
+          orderId: orderId,
+          userEmail: user?.primaryEmailAddress?.emailAddress || 'test@example.com',
+          productOwnerEmail: orderData.productOwnerEmail,
+          productOwnerName: orderedByName || 'Product Owner',
+          product: {
+            name: orderData.product.name,
+            quantity: orderData.product.quantity,
+            measureUnit: orderData.product.measureUnit,
+            imageUrl: orderData.product.imageUrl,
+          },
+          totalPrice: orderData.totalPrice,
+          status: orderData.status || 'Pending',
+          paymentMethod: 'Khalti',
+          orderDate: new Date().toLocaleString(),
+        };
+
+        const resp = await fetch(INVOICE_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(invoiceData),
+        });
+
+        const json = await resp.json();
+        console.log('Invoice server response:', json);
+      } catch (error) {
+        console.error('Error generating invoice (no-firebase):', error);
+      }
+    };
 
     const payload = {
       return_url: SUCCESS_URL,
@@ -146,7 +172,14 @@ const KhaltiPaymentScreen = () => {
       const data = JSON.parse(text);
 
       if (response.ok && data.payment_url) {
+        // Send invoice email
+        sendInvoiceEmail();
+
         Linking.openURL(data.payment_url);
+        // Navigate to home after opening Khalti payment page
+        setTimeout(() => {
+          router.replace('/(auth)/home');
+        }, 1000);
       } else {
         Alert.alert(
           'Khalti Error',

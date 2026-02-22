@@ -5,6 +5,7 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import * as SecureStore from 'expo-secure-store';
 import * as Device from 'expo-device';
+import * as Linking from 'expo-linking';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from './../config/FirebaseConfig'; 
 import { useUser } from '@clerk/clerk-expo';
@@ -78,6 +79,29 @@ const InitialLayout = () => {
       return () => Notifications.removeNotificationSubscription(subscription);
     }
   }, [isSignedIn]);
+
+  // Deep link handling
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      const { url } = event;
+      if (url === 'myapp://payment-success') {
+        router.replace('/payment-success');
+      }
+    };
+
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+
+    // Check initial URL
+    Linking.getInitialURL().then((url) => {
+      if (url === 'myapp://payment-success') {
+        router.replace('/payment-success');
+      }
+    });
+
+    return () => {
+      // Cleanup not needed for linking listener in this context
+    };
+  }, [router]);
 
   return <Slot />;
 };
