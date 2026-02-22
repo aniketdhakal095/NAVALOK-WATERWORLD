@@ -1,195 +1,221 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, Text, Pressable, TouchableOpacity, Image, StyleSheet, ScrollView, 
-  TextInput, Alert 
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  Image,
+  Pressable,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
-// Only use useRouter from expo-router
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/FirebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
-import { useUser } from '@clerk/clerk-expo';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import Colors from '../../constants/Colors';
 
 export default function InventoryProductEdit() {
-  const product = useLocalSearchParams();  // Directly access params from the route
-
-  // Ensure formData matches expected structure
-  const [formData, setFormData] = useState({
-    name: '',
-    category: 'Tools',
-    price: '',
-    quantity: '',
-    measureUnit: 'Pcs',
-    description: '',
-    imageUrl: ''
-  });
-
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const params = useLocalSearchParams();
 
+  // ✅ same safe param handling
+  const productId = Array.isArray(params.productId)
+    ? params.productId[0]
+    : params.productId;
+
+  const [productName, setProductName] = useState('');
+  const [productCategory, setProductCategory] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productQuantity, setProductQuantity] = useState('');
+  const [productMeasure, setProductMeasure] = useState('');
+  const [productDescription, setProductDescription] = useState('');
+  const [productImage, setProductImage] = useState('');
+
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+
+  // ---------------- FETCH PRODUCT ----------------
   useEffect(() => {
-    fetchProductDetails();
-  }, []);
+    if (!productId) return;
+    fetchProductData();
+  }, [productId]);
 
-  const fetchProductDetails = async () => {
-    try {
-      // Ensure product.id is a string
-      const productRef = doc(db, 'InventoryProduct', product.id as string); // Fix: ensure product.id is a string
-      const productSnap = await getDoc(productRef);
-
-      if (productSnap.exists()) {
-        const data = productSnap.data();
-        setFormData({
-          name: data.name || '',
-          category: data.category || 'Tools',
-          price: data.price || '',
-          quantity: data.quantity || '',
-          measureUnit: data.measureUnit || 'Pcs',
-          description: data.description || '',
-          imageUrl: data.imageUrl || '',
-        });
-      } else {
-        Alert.alert('Error', 'Product not found!');
-      }
-    } catch (error) {
-      console.error('Error fetching product:', error);
-      Alert.alert('Error', 'Failed to fetch product details.');
-    }
-  };
-
-  const handleInputChange = (fieldName, fieldValue) => {
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: fieldValue,
-    }));
-  };
-
-  const updateProduct = async () => {
+  const fetchProductData = async () => {
     try {
       setLoading(true);
-      // Use product.id instead of productId
-      await updateDoc(doc(db, 'InventoryProduct', product.id as string), formData); // Fix: use product.id here
-      Alert.alert('Success', 'Product updated successfully!');
-      router.back();
+
+      const docRef = doc(db, 'InventoryProduct', productId as string);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        Alert.alert('Error', 'Product not found');
+        router.back();
+        return;
+      }
+
+      const data = docSnap.data();
+
+      setProductName(data?.name ?? '');
+      setProductCategory(data?.category ?? '');
+      setProductPrice(String(data?.price ?? ''));
+      setProductQuantity(String(data?.quantity ?? ''));
+      setProductMeasure(data?.measureUnit ?? '');
+      setProductDescription(data?.description ?? '');
+      setProductImage(data?.imageUrl ?? '');
     } catch (error) {
-      console.error('Update error:', error);
-      Alert.alert('Error', 'Failed to update product.');
+      console.log(error);
+      Alert.alert('Failed to load product');
+      router.back();
     } finally {
       setLoading(false);
     }
   };
 
-  const imagePicker = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  // ---------------- IMAGE PICKER ----------------
+  const pickImage = async () => {
+    if (Platform.OS !== 'web') {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert('Permission required');
+        return;
+      }
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
     });
 
     if (!result.canceled) {
-      const imageUrl = await uploadImageToCloudinary(result.assets[0].uri);
-      setFormData((prev) => ({ ...prev, imageUrl })); // Update formData with the new imageUrl
+      setProductImage(result.assets[0].uri);
     }
   };
 
-  const uploadImageToCloudinary = async (imageUri) => {
+  // ---------------- UPDATE ----------------
+  const handleUpdate = async () => {
+    if (!productName || !productPrice || !productQuantity) {
+      Alert.alert('Fill all fields');
+      return;
+    }
+
     try {
-      const response = await fetch(imageUri);
-      const blob = await response.blob(); // Convert image to Blob
+      setUpdating(true);
 
-      const data = new FormData();
-      data.append('file', blob, 'upload.jpg'); // Correct FormData usage
-      data.append('upload_preset', '_ProductImage');
-      data.append('cloud_name', 'dgydap1ot');
+      const productRef = doc(db, 'InventoryProduct', productId as string);
 
-      const uploadResponse = await fetch('https://api.cloudinary.com/v1_1/dgydap1ot/image/upload', {
-        method: 'POST',
-        body: data,
-        headers: { 'Accept': 'application/json' },
+      await updateDoc(productRef, {
+        name: productName,
+        category: productCategory,
+        price: Number(productPrice),
+        quantity: Number(productQuantity),
+        measureUnit: productMeasure,
+        description: productDescription,
+        imageUrl: productImage,
       });
 
-      const result = await uploadResponse.json();
-      return result.secure_url;
+      Alert.alert('Success', 'Product updated');
+      router.back();
     } catch (error) {
-      console.error('Upload error:', error);
-      Alert.alert('Error', 'Failed to upload image.');
+      console.log(error);
+      Alert.alert('Update failed');
+    } finally {
+      setUpdating(false);
     }
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name='arrow-back' size={20} color='black' />
-        </Pressable>
-        <Text style={styles.title}>Edit Inventory Product</Text>
+  // ---------------- LOADING ----------------
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <ActivityIndicator size="large" />
       </View>
+    );
+  }
 
-      <Pressable onPress={imagePicker}>
-        <Image
-          source={formData.imageUrl ? { uri: formData.imageUrl } : require('../../assets/images/imageplaceholder.jpg')}
-          style={styles.imagePreview}
-        />
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Edit Inventory Product</Text>
+
+      {/* Image */}
+      <Pressable onPress={pickImage} style={{ alignItems: 'center' }}>
+        {productImage ? (
+          <Image source={{ uri: productImage }} style={styles.imagePreview} />
+        ) : (
+          <View style={styles.imagePreview}>
+            <Text>Select Image</Text>
+          </View>
+        )}
       </Pressable>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Product Name</Text>
-        <TextInput 
-          style={styles.input} 
-          value={formData.name} 
-          onChangeText={(value) => handleInputChange('name', value)} 
-        />
-      </View>
+      <Text style={styles.label}>Name</Text>
+      <TextInput style={styles.input} value={productName} onChangeText={setProductName} />
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Product Price (Rs.)</Text>
-        <TextInput 
-          style={styles.input} 
-          keyboardType='number-pad' 
-          value={formData.price} 
-          onChangeText={(value) => handleInputChange('price', value)} 
-        />
-      </View>
+      <Text style={styles.label}>Category</Text>
+      <TextInput style={styles.input} value={productCategory} onChangeText={setProductCategory} />
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Product Quantity</Text>
-        <TextInput 
-          style={styles.input} 
-          keyboardType='number-pad' 
-          value={formData.quantity} 
-          onChangeText={(value) => handleInputChange('quantity', value)} 
-        />
-      </View>
+      <Text style={styles.label}>Price</Text>
+      <TextInput
+        style={styles.input}
+        value={productPrice}
+        keyboardType="numeric"
+        onChangeText={setProductPrice}
+      />
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Product Description</Text>
-        <TextInput 
-          style={styles.input} 
-          multiline 
-          numberOfLines={5} 
-          value={formData.description} 
-          onChangeText={(value) => handleInputChange('description', value)} 
-        />
-      </View>
+      <Text style={styles.label}>Quantity</Text>
+      <TextInput
+        style={styles.input}
+        value={productQuantity}
+        keyboardType="numeric"
+        onChangeText={setProductQuantity}
+      />
 
-      <TouchableOpacity style={styles.button} onPress={updateProduct} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Updating...' : 'Save Changes'}</Text>
+      <Text style={styles.label}>Measure Unit</Text>
+      <TextInput style={styles.input} value={productMeasure} onChangeText={setProductMeasure} />
+
+      <Text style={styles.label}>Description</Text>
+      <TextInput
+        style={styles.input}
+        multiline
+        value={productDescription}
+        onChangeText={setProductDescription}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+        <Text style={styles.buttonText}>
+          {updating ? 'Updating...' : 'Update Product'}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f8f8f8' },
-  header: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
-  backButton: { padding: 10, borderRadius: 30, elevation: 5 },
-  title: { fontSize: 20, fontWeight: 'bold', flex: 1, textAlign: 'center' },
-  imagePreview: { width: 100, height: 100, borderRadius: 15 },
-  inputContainer: { marginVertical: 5 },
-  input: { padding: 10, backgroundColor: '#fff', borderRadius: 7 },
-  label: { marginVertical: 5, fontWeight: 'bold' },
-  button: { padding: 15, backgroundColor: 'green', borderRadius: 7, marginVertical: 10 },
-  buttonText: { textAlign: 'center', fontWeight: 'bold', color: '#fff' },
+  container: { padding: 16, flexGrow: 1 },
+  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center' },
+  label: { marginTop: 12, fontWeight: 'bold' },
+  input: { borderWidth: 1, borderRadius: 8, padding: 10, marginTop: 5 },
+  imagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    backgroundColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: Colors.PRIMARY,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  buttonText: { color: '#fff', fontWeight: 'bold' },
 });

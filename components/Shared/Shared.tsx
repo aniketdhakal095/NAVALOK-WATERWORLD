@@ -1,7 +1,7 @@
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../config/FirebaseConfig";
 
-const GetFavList = async (user) => {
+const GetFavList = async (user: { primaryEmailAddress: { emailAddress: string; }; }) => {
     try {
         if (!user?.primaryEmailAddress?.emailAddress) {
             throw new Error("User email is not defined.");
@@ -26,7 +26,7 @@ const GetFavList = async (user) => {
     }
 };
 
-const UpdateFav = async (favorites, user) => {
+const UpdateFav = async (favorites: any, user: { primaryEmailAddress: { emailAddress: string; }; }) => {
     try {
         if (!user?.primaryEmailAddress?.emailAddress) {
             throw new Error("User email is not defined.");

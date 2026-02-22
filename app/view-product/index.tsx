@@ -15,7 +15,7 @@ type CollectionName = 'Product' | 'InventoryProduct' | 'Fish_Plant';
 type ProductType = {
   id: string;
   name: string;
-  imageUrl?: string; // optional for safety
+  imageUrl?: string;
   category?: string;
   price?: number;
   quantity?: number;
@@ -60,12 +60,10 @@ export default function ViewProducts() {
         return snapshot.docs.map(doc => {
           const data = doc.data();
 
-          // FIX: Fish_Plant might store image differently in Cloudinary
           let imageUrl = '';
           if (colName === 'Fish_Plant') {
-            // Some Fish_Plant products may have: { image: { secure_url: '...' } }
             if (data.image?.secure_url) imageUrl = data.image.secure_url;
-            else if (data.imageUrl) imageUrl = data.imageUrl; // fallback
+            else if (data.imageUrl) imageUrl = data.imageUrl;
           } else {
             imageUrl = data.imageUrl || '';
           }
@@ -104,7 +102,8 @@ export default function ViewProducts() {
       [
         { text: "Cancel", style: "cancel" },
         { 
-          text: "Delete", style: "destructive", 
+          text: "Delete", 
+          style: "destructive", 
           onPress: async () => {
             try {
               await deleteDoc(doc(db, collectionName, productId));
@@ -126,15 +125,18 @@ export default function ViewProducts() {
       InventoryProduct: "/InventoryProductEditingPage",
       Fish_Plant: "/FishandPlantEditPage"
     };
-    router.push({ pathname: editRoutes[product.collectionName], params: {
-    productId: product.id,      // IMPORTANT
-    name: product.name,
-    imageUrl: product.imageUrl,
-   
-    price: String(product.price),
-    quantity: String(product.quantity),
-    measureUnit: product.measureUnit,
-  },});
+    router.push({ 
+      pathname: editRoutes[product.collectionName], 
+      params: {
+        id: product.id,
+        collectionName: product.collectionName,
+        name: product.name,
+        imageUrl: product.imageUrl,
+        price: String(product.price),
+        quantity: String(product.quantity),
+        measureUnit: product.measureUnit,
+      },
+    });
   };
 
   if (loading) return <ActivityIndicator size="large" color="#356de7ff" style={styles.loader} />;
@@ -176,7 +178,7 @@ export default function ViewProducts() {
           renderItem={({ item }) => {
             const imageUri = item.imageUrl && item.imageUrl !== '' 
               ? item.imageUrl 
-              : 'https://via.placeholder.com/150'; // placeholder
+              : 'https://via.placeholder.com/150';
 
             return (
               <View style={styles.productCardGrid}>
@@ -209,7 +211,6 @@ export default function ViewProducts() {
   );
 }
 
-// ------------------- STYLES -------------------
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f8f8f8' },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },

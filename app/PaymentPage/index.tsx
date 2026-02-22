@@ -9,15 +9,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import {
-  getDoc,
-  doc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
-import { db } from '../../config/FirebaseConfig';
 import { useUser } from '@clerk/clerk-expo';
 
 const KhaltiPaymentScreen = () => {
@@ -40,6 +31,9 @@ const KhaltiPaymentScreen = () => {
   const SUCCESS_URL = 'https://example.com/khalti-success';
   const FAILURE_URL = 'https://example.com/khalti-failure';
 
+  // ✅ Replace with your ngrok URL
+  const API_BASE_URL = 'YOUR_NGROK_URL'; // e.g., https://abcd1234.ngrok.io
+
   useEffect(() => {
     const fetchData = async () => {
       if (!orderId) {
@@ -49,29 +43,23 @@ const KhaltiPaymentScreen = () => {
       }
 
       try {
-        // 🔹 Fetch Order
-        const orderRef = doc(db, 'Orders', orderId);
-        const orderSnap = await getDoc(orderRef);
-
-        if (!orderSnap.exists()) {
+        // 🔹 Fetch Order from API instead of Firebase
+        const orderResponse = await fetch(`${API_BASE_URL}/api/orders/${orderId}`);
+        if (!orderResponse.ok) {
           Alert.alert('Error', 'Order not found.');
           setFetchingData(false);
           return;
         }
 
-        const order = orderSnap.data();
+        const order = await orderResponse.json();
         setOrderData(order);
 
-        // 🔹 Fetch Product Owner
+        // 🔹 Fetch Product Owner from API
         const productOwnerEmail = order.productOwnerEmail;
-        const userQuery = query(
-          collection(db, 'Users'),
-          where('email', '==', productOwnerEmail)
-        );
-        const userSnapshot = await getDocs(userQuery);
-
-        if (!userSnapshot.empty) {
-          const userInfo = userSnapshot.docs[0].data();
+        const userResponse = await fetch(`${API_BASE_URL}/api/users/email/${productOwnerEmail}`);
+        
+        if (userResponse.ok) {
+          const userInfo = await userResponse.json();
           const fullName = `${userInfo.firstName || ''} ${
             userInfo.lastName || ''
           }`.trim();
@@ -104,44 +92,10 @@ const KhaltiPaymentScreen = () => {
       return;
     }
 
-    // Prepare invoice data and send to local invoice server (no Firebase)
-    const INVOICE_API_URL = process.env.INVOICE_API_URL || 'http://localhost:3001/api/send-invoice';
-    const sendInvoiceEmail = async () => {
-      try {
-        const invoiceData = {
-          orderId: orderId,
-          userEmail: user?.primaryEmailAddress?.emailAddress || 'test@example.com',
-          productOwnerEmail: orderData.productOwnerEmail,
-          productOwnerName: orderedByName || 'Product Owner',
-          product: {
-            name: orderData.product.name,
-            quantity: orderData.product.quantity,
-            measureUnit: orderData.product.measureUnit,
-            imageUrl: orderData.product.imageUrl,
-          },
-          totalPrice: orderData.totalPrice,
-          status: orderData.status || 'Pending',
-          paymentMethod: 'Khalti',
-          orderDate: new Date().toLocaleString(),
-        };
-
-        const resp = await fetch(INVOICE_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(invoiceData),
-        });
-
-        const json = await resp.json();
-        console.log('Invoice server response:', json);
-      } catch (error) {
-        console.error('Error generating invoice (no-firebase):', error);
-      }
-    };
-
     const payload = {
       return_url: SUCCESS_URL,
-      website_url: FAILURE_URL, // 🔥 REQUIRED
-      amount: amount * 100, // paisa
+      website_url: FAILURE_URL,
+      amount: amount * 100,
       purchase_order_id: orderId,
       purchase_order_name: 'FreshFarm Order',
       customer_info: {
@@ -172,9 +126,6 @@ const KhaltiPaymentScreen = () => {
       const data = JSON.parse(text);
 
       if (response.ok && data.payment_url) {
-        // Send invoice email
-        sendInvoiceEmail();
-
         Linking.openURL(data.payment_url);
         // Navigate to home after opening Khalti payment page
         setTimeout(() => {
