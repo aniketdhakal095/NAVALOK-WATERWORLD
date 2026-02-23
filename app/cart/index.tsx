@@ -15,19 +15,17 @@ export default function CartScreen() {
 
   const handleGoBack = () => router.back();
 
-  // Parse product
   let parsedProduct;
   try {
     parsedProduct = typeof product === 'string' ? JSON.parse(product) : product;
   } catch (error) {
-    console.error("Error parsing product:", error);
+    console.error('Error parsing product:', error);
     parsedProduct = {};
   }
 
   const itemQuantity = Number(quantity) || 1;
   const totalPrice = (parsedProduct?.price || 0) * itemQuantity;
 
-  // Assign collectionType automatically based on a property
   if (!parsedProduct.collectionType) {
     if (parsedProduct.species || parsedProduct.waterType) {
       parsedProduct.collectionType = 'Fish_Plant';
@@ -38,7 +36,6 @@ export default function CartScreen() {
     }
   }
 
-  // Request notification permission
   useEffect(() => {
     const requestPermission = async () => {
       if (Platform.OS === 'android') {
@@ -49,22 +46,20 @@ export default function CartScreen() {
     requestPermission();
   }, []);
 
-  // Send notification when order is placed
   const sendOrderNotification = async () => {
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "Order Placed",
+          title: 'Order Placed',
           body: `Your order for ${itemQuantity} ${parsedProduct?.name} has been successfully placed! Total: Rs. ${totalPrice.toFixed(2)}`,
         },
         trigger: null,
       });
     } catch (error) {
-      console.error("Error sending notification:", error);
+      console.error('Error sending notification:', error);
     }
   };
 
-  // Initiate order & chat
   const InitiateChat = async () => {
     try {
       const userEmail = user?.primaryEmailAddress?.emailAddress;
@@ -100,33 +95,35 @@ export default function CartScreen() {
           name: user?.fullName || 'Anonymous',
           imageUrl: user?.imageUrl || '',
         },
-        text: `Order placed for ${itemQuantity} ${parsedProduct?.measureUnit || "unit"} of ${parsedProduct?.name} at Rs. ${totalPrice.toFixed(2)}`,
+        text: `Order placed for ${itemQuantity} ${parsedProduct?.measureUnit || 'unit'} of ${parsedProduct?.name} at Rs. ${totalPrice.toFixed(2)}`,
         messageType: 'text',
         timestamp: serverTimestamp(),
       });
 
       await sendOrderNotification();
 
-      // Navigate to CheckoutScreen with collectionType
       router.push({
-        pathname: "/Checkout",
+        pathname: '/Checkout',
         params: {
           product: JSON.stringify(parsedProduct),
           quantity: itemQuantity,
           totalPrice: totalPrice.toFixed(2),
-          collectionType: parsedProduct.collectionType, // <-- crucial
+          collectionType: parsedProduct.collectionType,
         },
       });
     } catch (error) {
-      console.error("Error initiating chat/order message:", error);
+      console.error('Error initiating chat/order message:', error);
     }
   };
 
   return (
     <View style={styles.container}>
+      <View style={styles.bgTopBlob} />
+      <View style={styles.bgBottomBlob} />
+
       <View style={styles.header}>
         <Pressable onPress={handleGoBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={20} color="black" />
+          <Ionicons name="arrow-back" size={20} color="#0f172a" />
         </Pressable>
         <Text style={styles.headerTitle}>Shopping Cart</Text>
       </View>
@@ -138,14 +135,15 @@ export default function CartScreen() {
           <Text style={styles.noImage}>No Image Available</Text>
         )}
         <View style={styles.productInfo}>
-          <Text style={styles.productName}>{parsedProduct?.name || "Unknown Product"}</Text>
-          <Text style={styles.productPrice}>Rs. {parsedProduct?.price || "0.00"} / {parsedProduct?.measureUnit}</Text>
-          <Text style={styles.quantity}>Quantity: {itemQuantity} {parsedProduct?.measureUnit || "unit"}</Text>
+          <Text style={styles.productName}>{parsedProduct?.name || 'Unknown Product'}</Text>
+          <Text style={styles.productPrice}>Rs. {parsedProduct?.price || '0.00'} / {parsedProduct?.measureUnit}</Text>
+          <Text style={styles.quantity}>Quantity: {itemQuantity} {parsedProduct?.measureUnit || 'unit'}</Text>
         </View>
       </View>
 
       <View style={styles.totalSection}>
-        <Text style={styles.totalPrice}>Total Price: Rs. {totalPrice.toFixed(2)}</Text>
+        <Text style={styles.totalLabel}>Total Price</Text>
+        <Text style={styles.totalPrice}>Rs. {totalPrice.toFixed(2)}</Text>
       </View>
 
       <TouchableOpacity style={styles.buyButton} onPress={InitiateChat}>
@@ -156,19 +154,79 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f9f9f9', justifyContent: 'space-between' },
-  header: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
-  backButton: { padding: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', borderRadius: 30, elevation: 5 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#333', textAlign: 'center', flex: 1 },
-  cartItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 16, elevation: 4 },
-  productImage: { width: 100, height: 100, borderRadius: 12, marginRight: 15 },
-  noImage: { fontSize: 14, color: '#888' },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f3f7fb',
+    justifyContent: 'space-between',
+  },
+  bgTopBlob: {
+    position: 'absolute',
+    top: -120,
+    right: -70,
+    width: 240,
+    height: 240,
+    borderRadius: 130,
+    backgroundColor: 'rgba(53, 109, 231, 0.18)',
+  },
+  bgBottomBlob: {
+    position: 'absolute',
+    bottom: -140,
+    left: -90,
+    width: 260,
+    height: 260,
+    borderRadius: 140,
+    backgroundColor: 'rgba(22, 167, 111, 0.12)',
+  },
+  header: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 12 },
+  backButton: {
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: 'outfits-extrabold',
+    color: '#0f172a',
+    marginLeft: 10,
+  },
+  cartItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    elevation: 3,
+  },
+  productImage: { width: 100, height: 100, borderRadius: 12, marginRight: 14 },
+  noImage: { fontSize: 14, color: '#64748b' },
   productInfo: { flex: 1 },
-  productName: { fontSize: 18, fontWeight: '600', color: '#333', marginBottom: 8 },
-  productPrice: { fontSize: 16, marginBottom: 8 },
-  quantity: { fontSize: 16, color: '#555', marginBottom: 8 },
-  totalSection: { alignItems: 'flex-start', marginBottom: 20 },
-  totalPrice: { fontSize: 18, fontWeight: 'bold', color: '#0a74da' },
-  buyButton: { backgroundColor: '#0a74da', paddingVertical: 12, borderRadius: 8, alignItems: 'center', marginBottom: 20 },
-  buyButtonText: { fontSize: 18, color: '#fff', fontWeight: 'bold' },
+  productName: { fontSize: 18, fontFamily: 'outfits-medium', color: '#0f172a', marginBottom: 8 },
+  productPrice: { fontSize: 14, color: '#475569', fontFamily: 'outfits', marginBottom: 6 },
+  quantity: { fontSize: 14, color: '#475569', fontFamily: 'outfits-medium' },
+  totalSection: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  totalLabel: { fontSize: 16, fontFamily: 'outfits-medium', color: '#334155' },
+  totalPrice: { fontSize: 20, fontFamily: 'outfits-extrabold', color: '#0a74da' },
+  buyButton: {
+    backgroundColor: '#0a74da',
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  buyButtonText: { fontSize: 18, color: '#fff', fontFamily: 'outfits-medium' },
 });

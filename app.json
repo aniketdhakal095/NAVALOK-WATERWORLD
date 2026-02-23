@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Navalok",
-    "slug": "Navalok",
+    "slug": "navalok",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.NOTIFICATIONS"
@@ -53,9 +52,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "0bbd33ee-d187-48e4-8e6c-cb1320843502"
+        "projectId": "9b703ac2-2155-4ef4-aee6-e8146dfbbf53"
       }
     },
-    "owner": "aniketdhakal"
+    "owner": "achuteys-organization"
   }
 }

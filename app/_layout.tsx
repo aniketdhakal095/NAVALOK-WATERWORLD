@@ -84,7 +84,7 @@ const InitialLayout = () => {
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {
       const { url } = event;
-      if (url === 'myapp://payment-success') {
+      if (url?.startsWith('myapp://payment-success')) {
         router.replace('/payment-success');
       }
     };
@@ -93,7 +93,7 @@ const InitialLayout = () => {
 
     // Check initial URL
     Linking.getInitialURL().then((url) => {
-      if (url === 'myapp://payment-success') {
+      if (url?.startsWith('myapp://payment-success')) {
         router.replace('/payment-success');
       }
     });

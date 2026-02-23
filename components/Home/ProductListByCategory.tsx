@@ -1,18 +1,14 @@
-import { View, FlatList, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
+import { View, FlatList, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Category from './Category';
 import { db } from '../../config/FirebaseConfig';
 import { collection, query, where, getDocs, DocumentData } from 'firebase/firestore';
 import ProductListItem from './ProductListItem';
 
-const { width } = Dimensions.get('window'); // Get screen width
-const ITEM_WIDTH = width / 2 - 20; // Ensure two columns with spacing
-
 const ProductListByCategory = () => {
   const [productList, setProductList] = useState<DocumentData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Fetch products for a given category
   const GetProductList = async (category: string) => {
     try {
       setLoading(true);
@@ -21,8 +17,12 @@ const ProductListByCategory = () => {
       const querySnapshot = await getDocs(q);
 
       const products: DocumentData[] = [];
-      querySnapshot.forEach(doc => {
-        products.push(doc.data());
+      querySnapshot.forEach((doc) => {
+        products.push({
+          id: doc.id,
+          collectionName: 'Product',
+          ...doc.data(),
+        });
       });
 
       setProductList(products);
@@ -33,25 +33,25 @@ const ProductListByCategory = () => {
     }
   };
 
-  // Load the "Fruits" category by default when the component mounts
   useEffect(() => {
     GetProductList('Fruits');
-  }, []); // Empty dependency array ensures this only runs once
+  }, []);
 
   return (
     <View style={styles.container}>
       <Category category={(value) => GetProductList(value)} />
-      
+
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+        <ActivityIndicator size="large" color="#0a74da" style={styles.loader} />
       ) : (
         <FlatList
           data={productList}
-          showsVerticalScrollIndicator={true}
-          numColumns={2} // Ensures 2 columns
-          keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+          numColumns={2}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => <ProductListItem product={item} />}
-          columnWrapperStyle={styles.row} // Ensures proper spacing
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.productList}
           ListEmptyComponent={<Text style={styles.emptyMessage}>No products found</Text>}
         />
       )}
@@ -62,30 +62,26 @@ const ProductListByCategory = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
-    paddingTop: 10,
+    paddingHorizontal: 2,
+    paddingTop: 6,
   },
   row: {
     justifyContent: 'space-between',
-    marginBottom: 10, 
-    width: '40%',
-     
-  },
-  productItem: {
-    width: ITEM_WIDTH,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
+    marginTop: 24,
+  },
+  productList: {
+    paddingTop: 10,
+    paddingBottom: 22,
   },
   emptyMessage: {
     textAlign: 'center',
     fontSize: 16,
-    marginTop: 20,
-    color: 'gray',
+    marginTop: 26,
+    color: '#64748b',
+    fontFamily: 'outfits-medium',
   },
 });
 

@@ -2,7 +2,6 @@ import { Image, View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../config/FirebaseConfig';
-import Colors from '../../constants/Colors';
 
 // Define a type for Category data
 interface CategoryData {
@@ -31,19 +30,23 @@ const Category = ({ category }: { category: (categoryName: string) => void }) =>
   };
 
   return (
-    <View style={{ marginTop: 20 }}>
-      <Text style={{ fontFamily: 'outfits-medium', fontSize: 20 }}>Category</Text>
+    <View style={{ marginTop: 18 }}>
+      <Text style={styles.sectionTitle}>Shop by Category</Text>
 
       <FlatList
+        key="category-horizontal-list"
         data={categoryList}
-        numColumns={5}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(item, index) => `${item.name}-${index}`}
         renderItem={({ item }) => (
           <TouchableOpacity
+            activeOpacity={0.85}
             onPress={() => {
               setSelectedCategory(item.name);
               category(item.name); // Pass the selected category to the parent component
             }}
-            style={{ flex: 1 }}
+            style={styles.categoryItem}
           >
             <View
               style={[
@@ -54,15 +57,15 @@ const Category = ({ category }: { category: (categoryName: string) => void }) =>
               {/* Fallback in case imageUrl is missing */}
               <Image
                 source={{ uri: item?.imageUrl || 'https://via.placeholder.com/40' }}
-                style={{ width: 40, height: 40 }}
+                style={styles.image}
               />
             </View>
             <Text
-              style={{
-                textAlign: 'center',
-                fontFamily: 'outfits-bold',
-                fontSize: 9,
-              }}
+              numberOfLines={1}
+              style={[
+                styles.label,
+                selectedCategory === item.name && styles.selectedLabel,
+              ]}
             >
               {item?.name}
             </Text>
@@ -74,18 +77,49 @@ const Category = ({ category }: { category: (categoryName: string) => void }) =>
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.SECONDARY,
-    padding: 15,
+  sectionTitle: {
+    fontFamily: 'outfits-medium',
+    fontSize: 20,
+    color: '#0f172a',
+    marginBottom: 10,
+  },
+  categoryItem: {
+    width: 86,
+    marginRight: 10,
     alignItems: 'center',
+  },
+  container: {
+    width: 70,
+    height: 70,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderRadius: 20,
-    borderColor: Colors.HeadCOL,
-    margin: 5,
+    borderColor: '#d9e5f1',
+    marginBottom: 6,
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
   selectedCategoryContainer: {
-    backgroundColor: Colors.PRIMARYB,
-    borderColor: Colors.SECONDARYB,
+    backgroundColor: '#dff1ff',
+    borderColor: '#0a74da',
+  },
+  image: {
+    width: 38,
+    height: 38,
+  },
+  label: {
+    textAlign: 'center',
+    fontFamily: 'outfits-medium',
+    fontSize: 11,
+    color: '#475569',
+  },
+  selectedLabel: {
+    color: '#0a74da',
   },
 });
 

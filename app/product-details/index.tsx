@@ -1,4 +1,4 @@
-import { View, ScrollView, Pressable, Text, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Pressable, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
@@ -18,28 +18,47 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!id || !collectionName) return;
+      const productId = Array.isArray(id) ? id[0] : id;
+      const selectedCollection = Array.isArray(collectionName) ? collectionName[0] : collectionName;
+
+      if (!productId) {
+        setError('Missing product id.');
+        setLoading(false);
+        return;
+      }
 
       try {
-        const docRef = doc(
-          db,
-          collectionName as string,
-          id as string
-        );
+        const collectionsToTry = selectedCollection ? [selectedCollection] : ['Product', 'InventoryProduct', 'Fish_Plant'];
 
-        const docSnap = await getDoc(docRef);
+        let foundProduct: any = null;
 
-        if (docSnap.exists()) {
-          setProduct({
-            id: docSnap.id,
-            ...docSnap.data(),
-          });
+        for (const col of collectionsToTry) {
+          const docRef = doc(db, col, productId as string);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            foundProduct = {
+              id: docSnap.id,
+              collectionName: col,
+              ...docSnap.data(),
+            };
+            break;
+          }
+        }
+
+        if (foundProduct) {
+          setProduct(foundProduct);
+          setError(null);
+        } else {
+          setError('Product not found.');
         }
       } catch (error) {
         console.log('Error fetching product:', error);
+        setError('Failed to load product.');
       } finally {
         setLoading(false);
       }
@@ -52,51 +71,39 @@ export default function ProductDetails() {
     router.back();
   };
 
-  if (loading || !product) {
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#2E86DE" />
+      <View style={styles.centerWrap}>
+        <ActivityIndicator size="large" color="#0a74da" />
+      </View>
+    );
+  }
+
+  if (!product) {
+    return (
+      <View style={styles.centerWrap}>
+        <Text style={styles.errorText}>{error ?? 'Unable to load product details.'}</Text>
+        <Pressable onPress={handleGoBack} style={styles.errorBtn}>
+          <Text style={styles.errorBtnText}>Go Back</Text>
+        </Pressable>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      {/* Header */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginTop: 10,
-          marginBottom: 10,
-        }}
-      >
-        <Pressable
-          onPress={handleGoBack}
-          style={{
-            padding: 10,
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            borderRadius: 30,
-            elevation: 5,
-          }}
-        >
-          <Ionicons name="arrow-back" size={20} color="black" />
+    <View style={styles.page}>
+      <View style={styles.bgTopBlob} />
+      <View style={styles.bgBottomBlob} />
+
+      <View style={styles.headerRow}>
+        <Pressable onPress={handleGoBack} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={20} color="#0f172a" />
         </Pressable>
 
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: '#333',
-            textAlign: 'center',
-            flex: 1,
-          }}
-        >
-          Details
-        </Text>
+        <Text style={styles.title}>Details</Text>
       </View>
 
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <ProductInfo product={product} />
         <Productsubinfo product={product} />
         <Subsubinfo product={product} />
@@ -108,3 +115,74 @@ export default function ProductDetails() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    backgroundColor: '#f3f7fb',
+  },
+  scrollContent: {
+    paddingBottom: 14,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  backBtn: {
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: 'outfits-extrabold',
+    color: '#0f172a',
+    marginLeft: 10,
+  },
+  centerWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f3f7fb',
+    paddingHorizontal: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 12,
+    fontFamily: 'outfits-medium',
+  },
+  errorBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#0a74da',
+    borderRadius: 8,
+  },
+  errorBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  bgTopBlob: {
+    position: 'absolute',
+    top: -120,
+    right: -70,
+    width: 240,
+    height: 240,
+    borderRadius: 130,
+    backgroundColor: 'rgba(53, 109, 231, 0.18)',
+  },
+  bgBottomBlob: {
+    position: 'absolute',
+    bottom: -140,
+    left: -90,
+    width: 260,
+    height: 260,
+    borderRadius: 140,
+    backgroundColor: 'rgba(22, 167, 111, 0.12)',
+  },
+});

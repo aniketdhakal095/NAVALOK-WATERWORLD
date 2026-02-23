@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -41,25 +41,25 @@ export default function Profile() {
     {
       id: 1,
       name: 'Fishs and Plants',
-      icon: 'add-circle-outline',
+      icon: 'fish-outline',
       path: '/FishandPlant',
     },
     {
       id: 2,
       name: 'My Orders',
-      icon: 'add-circle-outline',
+      icon: 'receipt-outline',
       path: '/see-my-order',
     },
     {
       id: 3,
       name: 'Sell Aquarium Product',
-      icon: 'add-circle-outline',
+      icon: 'basket-outline',
       path: '/farm-sell-product',
     },
     {
       id: 4,
       name: 'Sell Inventory Product',
-      icon: 'add-circle-outline',
+      icon: 'cube-outline',
       path: '/inventory-sell-product',
     },
     {
@@ -82,6 +82,8 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.bgTopBlob} />
+      <View style={styles.bgBottomBlob} />
       <View style={styles.profileHeader}>
         <View style={styles.profileImageContainer}>
           <Image
@@ -111,19 +113,22 @@ export default function Profile() {
       <FlatList
         data={Menu}
         keyExtractor={(item) => item.id.toString()}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.menuList}
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => handleMenuItemPress(item.path)} // Navigate when item is pressed
             style={styles.menuItem}
+            activeOpacity={0.9}
           >
             <Ionicons
               name={item.icon as any}
-              size={30}
-              color="green"
+              size={22}
+              color={Colors.PRIMARY}
               style={styles.menuItemIcon}
             />
             <Text style={styles.menuItemText}>{item.name}</Text>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
           </TouchableOpacity>
         )}
       />
@@ -133,64 +138,110 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    backgroundColor: '#f3f7fb',
+  },
+  bgTopBlob: {
+    position: 'absolute',
+    top: -120,
+    right: -70,
+    width: 240,
+    height: 240,
+    borderRadius: 130,
+    backgroundColor: 'rgba(53, 109, 231, 0.18)',
+  },
+  bgBottomBlob: {
+    position: 'absolute',
+    bottom: -140,
+    left: -90,
+    width: 260,
+    height: 260,
+    borderRadius: 140,
+    backgroundColor: 'rgba(22, 167, 111, 0.12)',
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 18,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
   },
   profileImageContainer: {
     position: 'relative',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 10,
+    width: 94,
+    height: 94,
+    borderRadius: 47,
+    borderWidth: 3,
+    borderColor: '#dbeafe',
   },
   editButton: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 2,
     right: 0,
-    backgroundColor: Colors.BUTTON_COLOR,
-    borderRadius: 20,
-    padding: 5,
+    backgroundColor: Colors.PRIMARY,
+    borderRadius: 16,
+    padding: 6,
   },
   profileName: {
-    fontFamily: 'outfits-bold',
-    fontSize: 20,
+    fontFamily: 'outfits-extrabold',
+    fontSize: 24,
     marginTop: 6,
-    color: '#333',
+    color: '#0f172a',
   },
   profileEmail: {
-    fontFamily: 'outfits',
-    fontSize: 16,
-    color: Colors.GRAY,
+    fontFamily: 'outfits-medium',
+    fontSize: 14,
+    color: '#64748b',
   },
   profilePhone: {
     fontFamily: 'outfits',
-    fontSize: 16,
-    color: Colors.GRAY,
-    marginTop: 10,
+    fontSize: 14,
+    color: '#334155',
+    marginTop: 8,
+    backgroundColor: '#eef6ff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  menuList: {
+    paddingBottom: 20,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    borderRadius: 14,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   menuItemIcon: {
-    padding: 10,
-    backgroundColor: Colors.BUTTON_COLOR,
-    borderRadius: 10,
+    padding: 9,
+    backgroundColor: '#e8f1fb',
+    borderRadius: 12,
   },
   menuItemText: {
-    fontFamily: 'outfits',
-    fontSize: 20,
-    marginLeft: 15,
-    color: '#333',
+    fontFamily: 'outfits-medium',
+    fontSize: 16,
+    marginLeft: 12,
+    color: '#0f172a',
+    flex: 1,
   },
 });

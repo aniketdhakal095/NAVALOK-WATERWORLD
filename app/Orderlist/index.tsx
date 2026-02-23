@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, FlatList, Pressable } from 'react-native';
 import { db } from '../../config/FirebaseConfig';
 import { collection, getDocs, updateDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -118,7 +118,7 @@ const OrderListScreen = () => {
       <Text style={styles.orderStatus}>Status: {item.status}</Text>
       <Text style={styles.productPrice}>Total: Rs. {item.totalPrice}</Text>
 
-      {item.status === 'Pending' && (
+      {(item.status === 'Pending' || item.status === 'Waiting') && (
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             style={[styles.button, styles.acceptButton]}

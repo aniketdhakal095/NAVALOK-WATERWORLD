@@ -1,4 +1,4 @@
-import { View, FlatList, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import React, { useState } from 'react';
 import InventoryCategory from './InventoryCategory';
 import { db } from '../../config/FirebaseConfig';
@@ -43,11 +43,17 @@ const InventoryProductListByCategory: React.FC = () => {
       <FlatList
         data={productList}
         style={styles.productList}
-        horizontal
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.id}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.content}
         renderItem={({ item }) => (
           <ProductListItem product={item} />
         )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No items found for this category.</Text>
+        }
       />
     </View>
   );
@@ -56,11 +62,26 @@ const InventoryProductListByCategory: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#f8f8f8',
+    paddingHorizontal: 12,
+    paddingTop: 6,
+    backgroundColor: 'transparent',
   },
   productList: {
     marginTop: 10,
+  },
+  row: {
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  content: {
+    paddingBottom: 24,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 26,
+    color: '#64748b',
+    fontFamily: 'outfits-medium',
+    fontSize: 14,
   },
 });
 

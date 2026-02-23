@@ -1,8 +1,5 @@
-import { View, Text, TouchableOpacity, FlatList, TextInput, StyleSheet } from 'react-native';
-import { useUser } from '@clerk/clerk-expo';
+import { View, FlatList, StyleSheet } from 'react-native';
 import React from 'react';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import InventorySearch from '../../components/Farmer/InventorySearch';
 
 // Import components
@@ -10,68 +7,61 @@ import Header from '../../components/Home/Header';
 import Slider from '../../components/Home/Slider';
 import ProductListByCategory from '../../components/Home/ProductListByCategory';
 
-
 const Home = () => {
-  const { user } = useUser();
-  const router = useRouter();
-  
-
   return (
-    <View style={{ flex: 1 }}>
-      {/* Using FlatList as the main scrollable component */}
+    <View style={styles.page}>
+      <View style={styles.bgTopBlob} />
+      <View style={styles.bgBottomBlob} />
       <FlatList
         ListHeaderComponent={
-          <View style={{ padding: 20, marginTop: 20, marginBottom:50 }}>
-            {/* Header */}
+          <View style={styles.content}>
             <Header />
-
-            {/* Slider */}
             <Slider />
-
-            <InventorySearch/>
-
-            {/* Search */}
-            <View>
-           
-                </View>
-
-            {/* Product Category and Product List */}
+            <InventorySearch />
             <ProductListByCategory />
           </View>
         }
-        data={[]} // FlatList requires data. Empty array ensures it renders properly.
+        data={[]}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={null} // No list items; just using ListHeaderComponent
+        renderItem={null}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
-
-      
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    elevation: 3,
-    marginVertical: 10,
-    marginHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#DDD',
-    height: 50,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  input: {
+  page: {
     flex: 1,
-    fontSize: 16,
-    color: '#333',
+    backgroundColor: '#f3f7fb',
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 36,
+  },
+  listContent: {
+    paddingBottom: 30,
+  },
+  bgTopBlob: {
+    position: 'absolute',
+    top: -120,
+    right: -70,
+    width: 260,
+    height: 260,
+    borderRadius: 140,
+    backgroundColor: 'rgba(10, 116, 218, 0.18)',
+  },
+  bgBottomBlob: {
+    position: 'absolute',
+    bottom: -120,
+    left: -90,
+    width: 280,
+    height: 280,
+    borderRadius: 160,
+    backgroundColor: 'rgba(22, 167, 111, 0.14)',
   },
 });
-
 
 export default Home;

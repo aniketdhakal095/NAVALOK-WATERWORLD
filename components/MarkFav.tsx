@@ -32,9 +32,9 @@ export default function MarkFav({ product }: Props) {
   };
 
   const addToFav = async () => {
-    if (!product?.id) return;
+    if (!product?.id || !user) return;
 
-    const updatedList = [...favList, product.id];
+    const updatedList = Array.from(new Set([...favList, product.id]));
 
     // ✅ instant UI update
     setFavList(updatedList);
@@ -48,7 +48,7 @@ export default function MarkFav({ product }: Props) {
   };
 
   const removeFromFav = async () => {
-    if (!product?.id) return;
+    if (!product?.id || !user) return;
 
     const updatedList = favList.filter(id => id !== product.id);
 

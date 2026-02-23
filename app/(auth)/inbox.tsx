@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../config/FirebaseConfig'; // Ensure this path is correct
@@ -73,36 +73,33 @@ export default function Inbox() {
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontFamily: 'outfits-medium', fontSize: 30, marginBottom: 20 }}>Inbox</Text>
+    <View style={styles.container}>
+      <View style={styles.bgTopBlob} />
+      <View style={styles.bgBottomBlob} />
+      <Text style={styles.heading}>Inbox</Text>
 
       {loading ? (
-        <ActivityIndicator size="large" color="blue" />
+        <ActivityIndicator size="large" color="#0a74da" />
       ) : (
         <FlatList
           data={userList}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={<Text style={styles.emptyText}>No conversations yet.</Text>}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 10,
-                borderBottomWidth: 1,
-                borderColor: '#ddd',
-              }}
+              style={styles.chatRow}
               onPress={() => handleUserPress(item.id)} // Navigate to chat screen
+              activeOpacity={0.9}
             >
               <Image
                 source={{ uri: item.imageUrl || 'https://placehold.it/100x100' }} // Default image if none exists
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  marginRight: 10,
-                }}
+                style={styles.avatar}
               />
-              <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.name}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.email} numberOfLines={1}>{item.email}</Text>
+              </View>
             </TouchableOpacity>
           )}
         />
@@ -110,3 +107,77 @@ export default function Inbox() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    backgroundColor: '#f3f7fb',
+  },
+  heading: {
+    fontFamily: 'outfits-extrabold',
+    fontSize: 30,
+    marginBottom: 14,
+    color: '#0f172a',
+  },
+  listContent: {
+    paddingBottom: 24,
+  },
+  chatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 14,
+    marginBottom: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  avatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    marginRight: 10,
+  },
+  name: {
+    fontFamily: 'outfits-medium',
+    fontSize: 16,
+    color: '#0f172a',
+  },
+  email: {
+    marginTop: 2,
+    fontFamily: 'outfits',
+    fontSize: 12,
+    color: '#64748b',
+  },
+  emptyText: {
+    marginTop: 40,
+    textAlign: 'center',
+    color: '#64748b',
+    fontFamily: 'outfits-medium',
+  },
+  bgTopBlob: {
+    position: 'absolute',
+    top: -120,
+    right: -70,
+    width: 240,
+    height: 240,
+    borderRadius: 130,
+    backgroundColor: 'rgba(53, 109, 231, 0.18)',
+  },
+  bgBottomBlob: {
+    position: 'absolute',
+    bottom: -140,
+    left: -90,
+    width: 260,
+    height: 260,
+    borderRadius: 140,
+    backgroundColor: 'rgba(22, 167, 111, 0.12)',
+  },
+});

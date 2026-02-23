@@ -25,12 +25,20 @@ export default function InventoryExplore() {
       // Search in InventoryProduct
       const inventoryQuery = query(collection(db, 'InventoryProduct'), where('name', '==', searchQuery.trim()));
       const inventorySnapshot = await getDocs(inventoryQuery);
-      const inventoryProducts = inventorySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const inventoryProducts = inventorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        collectionName: 'InventoryProduct',
+        ...doc.data(),
+      }));
 
       // Search in Product
       const productQuery = query(collection(db, 'Product'), where('name', '==', searchQuery.trim()));
       const productSnapshot = await getDocs(productQuery);
-      const products = productSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const products = productSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        collectionName: 'Product',
+        ...doc.data(),
+      }));
 
       // Combine results
       setProductList([...inventoryProducts, ...products]);
@@ -147,5 +155,4 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
 });
-
 
